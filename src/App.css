@@ -1,18 +1,17 @@
-html{
 
-  background-color: black;
-}
-header{
+.header {
   padding-top: 0;
   margin-top: 0;
   background-color: #61dafb;
-  height: 100px;
+  width: 100%;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  z-index: 1;
 
 
 }
-header > p{
+.header > p {
 
   margin-top: 0;
   font-family: VT323, monospace;
@@ -21,35 +20,98 @@ header > p{
   margin-left: 50px;
 }
 
-.fact-generator {
+.buttons {
   text-align: center;
+  background-color: grey;
+  z-index: 0;
+  overflow: hidden;
+
+
 }
 
+.bg{
+  /*#omg pointer-events: none could be useful!!*/
+  float: top;
+
+
+
+
+}
+/*
+container-fluid is a bootstrap class and it has default padding of 15 px so I removed it so the container has full width
+ */
+.container-fluid {
+
+  position: relative;
+  margin-left: 0;
+  width: 100%;
+  border: none;
+  padding: 0 !important;
+
+
+
+
+}
+
+
+.cat{
+  background-image: url("/src/cuteCat.jpg");
+  display: inline-block;
+  vertical-align: top;
+
+
+
+}
+
+.dog{
+  background-image: url("/src/cuteDog.jpg");
+  display: inline-block;
+
+  vertical-align: top;
+  background-repeat: repeat;
+
+  z-index: -1;
+
+}
+
+.horse{
+  background-image: url("/src/cuteHorse.jpg");
+  display: inline-block;
+  vertical-align: top;
+
+
+
+}
+
+.snail{
+  background-image: url("/src/cuteSnail.jpg");
+  display: inline-block;
+  vertical-align: top;
+
+
+
+}
 .search-bar{
   margin: 1%;
   padding: 8px;
   font-size: 20pt;
+
 }
 
-
-
-
-
-
-.App-link {
-  color: #61dafb;
-}
 
 button {
-  width: 5%;
-  height: 8%
+  width: 80px;
+  height: 8%;
 
 }
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+
+
+
+/** {
+
+  border: 1px solid #f00 !important;
+}*/
+
+
+
+

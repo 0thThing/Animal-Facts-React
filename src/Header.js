@@ -3,9 +3,9 @@ import React from 'react'
 function Header() {
 
     return (
-        <header >
+        <div className='header'>
             <p>Welcome to my random animal facts page!</p>
-        </header>
+        </div>
     )
 }
 export default Header;

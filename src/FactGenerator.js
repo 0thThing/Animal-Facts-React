@@ -1,12 +1,25 @@
 import React from 'react'
+import Button from 'react-bootstrap/Button'
 
-
+//problem is when you click a checkbox the render fuinction runs and there are no filtered facts yet, there has got to tbe a better way
 class FactGenerator extends React.Component {
     constructor() {
         super();
         this.state = {
-            facts: [],
-            filteredFacts: [],
+            allFacts: [
+                {animal: 'cat', facts: []},
+                {animal: 'dog', facts: []},
+                {animal: 'snail',facts: []},
+                {animal: 'horse',facts: []},
+
+            ],
+            filteredFacts: [
+                {animal: 'cat', facts: []},
+                {animal: 'dog', facts: []},
+                {animal: 'snail',facts: []},
+                {animal: 'horse',facts: []},
+
+            ],
             numberOfFacts: 2,
             factTypes: [
                 {animal: 'cat', getFact: false, id: 1},
@@ -27,10 +40,10 @@ class FactGenerator extends React.Component {
     getFacts() {
 
         let animalTypes = ''
-        for (let i=0;i< this.state.factTypes.length;i++)
+        for (let i=0;i< this.state.factTypes.length;i++)//loop to construct the proper string so the api returns only the animal facts requested
         {
             let fact = this.state.factTypes[i]
-            console.log(this.state.factTypes[i].getFact)
+
             if (fact.getFact)
             {
                 console.log(fact.animal)
@@ -44,15 +57,50 @@ class FactGenerator extends React.Component {
             .then(res => res.json())
             .then(res => {
                 console.log(res)
-                let fact_list = [];
+                let dogFactList = [];
+                let catFactList = [];
+                let snailFactList = [];
+                let horseFactList = [];
+                let allFacts = [];
+
+
+
                 for (let i = 0; i < res.length; i++) {
-                    let {text,id} = res[i]
-                    fact_list.push({text, id})
+
+                    let {text,id,type} = res[i]
+                    if(res[i].type === 'cat'){
+                        catFactList.push({text,id,type})
+                        allFacts.push({text,id,type})
+                    }
+                    else if(res[i].type === 'dog'){
+                        dogFactList.push({text,id,type})
+                        allFacts.push({text,id,type})
+                    }
+                    else if(res[i].type === 'snail'){
+                        snailFactList.push({text,id,type})
+                        allFacts.push({text,id,type})
+                    }
+                    else if(res[i].type === 'horse'){
+                        horseFactList.push({text,id,type})
+                        allFacts.push({text,id,type})
+                    }
+
                 }
 
                 this.setState({ //set them both since we only display filtered facts below
-                    facts: fact_list,
-                    filteredFacts: fact_list,
+                    facts: [
+                        {animal: 'cat', facts: catFactList},
+                        {animal: 'dog', facts: dogFactList},
+                        {animal: 'snail',facts: snailFactList},
+                        {animal: 'horse',facts: horseFactList},
+
+                    ],
+                    filteredFacts: [
+                        {animal: 'cat', facts: catFactList},
+                        {animal: 'dog', facts: dogFactList},
+                        {animal: 'snail',facts: snailFactList},
+                        {animal: 'horse',facts: horseFactList},
+                    ]
                 })
 
             })
@@ -68,7 +116,6 @@ class FactGenerator extends React.Component {
                 console.log(factType.id)
                 console.log(event.target.name)
                 if (factType.id == event.target.name) {
-
                     factType.getFact = !factType.getFact
                 }
                 return factType
@@ -87,37 +134,99 @@ class FactGenerator extends React.Component {
     }
 
     handleFilter(event) {
-        let filteredFacts = this.state.facts.filter((fact) => {
-                return fact.text.toLowerCase().includes(event.target.value.toLowerCase())
-            }
-        )
+
+        let allFilteredFacts = []
+        for (let i=0;i<this.state.facts.length;i++){
+            //going to loop through and try to filter each animal fact type seperate
+            //one thing I dont like here is the order could get messed up if you change the state variables
+            let list = this.state.allFacts[i].facts
+            let filteredFacts = list.filter((fact) => {
+
+                    return fact.text.toLowerCase().includes(event.target.value.toLowerCase())
+                }
+            )
+            allFilteredFacts.push(filteredFacts)
+        }
 
         this.setState({
-            filteredFacts: filteredFacts
+            filteredFacts: [
+
+                {animal: 'cat', facts: allFilteredFacts[0]},
+                {animal: 'dog', facts: allFilteredFacts[1]},
+                {animal: 'snail',facts: allFilteredFacts[2]},
+                {animal: 'horse',facts: allFilteredFacts[3]},
+            ]
         })
 
     }
 
     render() {
-        let facts = this.state.filteredFacts.map(fact => <p key={fact.text}>{fact.text}</p>)  // Note we are using filteredFacts from state here DO NOT THINK WE NEED TO PASS THIS INTO HANDLECHANGE ANYMORE
+        let backgroundDivs
+        let count = 0;
+        for (let type of this.state.factTypes)
+        {
+
+            if(type.getFact){
+                count = count +1
+                console.log(count)
+            }
+        }
+        let widthPercentage = (1/count)* 100
+
+        let divWidth = widthPercentage+'%'
+        let divStyle
+
+        count = 0// this can not be the best way but I have to reset this counter to then calculate the margins for the divs
+        backgroundDivs = this.state.filteredFacts.map((obj, index) => {
+            console.log('is this if working the way it should?',obj.facts !== [])
+            if(obj.facts !== []){
+
+                let divMargin = widthPercentage * count+'%'
+                divStyle = {width: divWidth, leftMargin: divMargin}
+                console.log('the div style is: ', divStyle)
+                count = count +1
+                console.log('here is the object that should have fact and animal', obj)
+
+                let divContent = obj.facts.map(fact => <p>{fact.text}</p>)//using index only works because the types of facts are in the same order
+                console.log('the div content is', divContent)
+                return <div className={obj.animal} style={divStyle}>{divContent}</div>
+
+            }
+
+        })
+
+
         return (
-            <div className='fact-generator'>
-                <input type='text' className='search-bar' placeholder='Search...' onChange={this.handleFilter}></input> <p></p>
+            <div className='container-fluid'>
+                <div className='buttons'>
+                    <input type='text' className='search-bar' placeholder='Search...'
+                           onChange={this.handleFilter}></input> <p></p>
 
-                <input type='number' placeholder='1' name='numberOfFacts' value={this.state.numberOfFacts} min={1} max={500} onChange={this.handleChange}></input>
-                <label>cat</label>
-                <input  type='checkbox' name='1' checked={this.state.factTypes[0].getFact} onChange={(e) => this.handleChange(e,this)}></input>
-                <label>dog</label>
-                <input  type='checkbox' name='2' checked={this.state.factTypes[1].getFact} onChange={(e) =>this.handleChange(e,this)}></input>
-                <label>snail</label>
-                <input  type='checkbox' name='3' checked={this.state.factTypes[2].getFact} onChange={(e) => this.handleChange(e,this)}></input>
-                <label>horse</label>
-                <input  type='checkbox' name='4' checked={this.state.factTypes[3].getFact} onChange={(e) =>this.handleChange(e,this)}></input> <p></p>
-                <button onClick={this.getFacts}>Get Facts!</button>
+                    <input type='number' placeholder='1' name='numberOfFacts' value={this.state.numberOfFacts} min={1}
+                           max={500} onChange={this.handleChange}></input>
+                    <label>cat</label>
+                    <input type='checkbox' name='1' checked={this.state.factTypes[0].getFact}
+                           onChange={(e) => this.handleChange(e, this)}></input>
+                    <label>dog</label>
+                    <input type='checkbox' name='2' checked={this.state.factTypes[1].getFact}
+                           onChange={(e) => this.handleChange(e, this)}></input>
+                    <label>snail</label>
+                    <input type='checkbox' name='3' checked={this.state.factTypes[2].getFact}
+                           onChange={(e) => this.handleChange(e, this)}></input>
+                    <label>horse</label>
+                    <input type='checkbox' name='4' checked={this.state.factTypes[3].getFact}
+                           onChange={(e) => this.handleChange(e, this)}></input> <p></p>
+                    <Button onClick={this.getFacts}>Get Facts!</Button>
 
-                {facts}
+                </div>
+
+
+                <div className='bg'>
+                    {backgroundDivs}
+                </div>
+
+
             </div>
-
         )
     }
 
