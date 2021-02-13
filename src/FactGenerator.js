@@ -1,7 +1,11 @@
 import React from 'react'
 import Button from 'react-bootstrap/Button'
+import Facts from './Facts'
 
-//problem is when you click a checkbox the render fuinction runs and there are no filtered facts yet, there has got to tbe a better way
+
+//note: this backend API that the facts come from do not distribute the facts evenly
+// so even though you request dog facts you might not get any if you request another type of animal fact as well
+//just noticed I could fix this problem but changing the way get facts works and just distribute the facts evenly
 class FactGenerator extends React.Component {
     constructor() {
         super();
@@ -88,7 +92,7 @@ class FactGenerator extends React.Component {
                 }
 
                 this.setState({ //set them both since we only display filtered facts below
-                    facts: [
+                    allFacts: [
                         {animal: 'cat', facts: catFactList},
                         {animal: 'dog', facts: dogFactList},
                         {animal: 'snail',facts: snailFactList},
@@ -115,7 +119,7 @@ class FactGenerator extends React.Component {
             let factTypeList = this.state.factTypes.map(factType => {
                 console.log(factType.id)
                 console.log(event.target.name)
-                if (factType.id == event.target.name) {
+                if (factType.id == event.target.name) {//this needs == and not === for type conversion
                     factType.getFact = !factType.getFact
                 }
                 return factType
@@ -134,18 +138,30 @@ class FactGenerator extends React.Component {
     }
 
     handleFilter(event) {
+        console.log(event.target.value)
+        if(event.target.value === '')
+        {
+            this.setState({
+                filteredFacts: this.state.allFacts
+
+            })
+        }
 
         let allFilteredFacts = []
-        for (let i=0;i<this.state.facts.length;i++){
+
+        for (let i=0;i<this.state.allFacts.length;i++){
             //going to loop through and try to filter each animal fact type seperate
             //one thing I dont like here is the order could get messed up if you change the state variables
-            let list = this.state.allFacts[i].facts
-            let filteredFacts = list.filter((fact) => {
 
+            let list = this.state.allFacts[i].facts
+            console.log('this is the list ',list)
+            let filteredFacts = list.filter((fact) => {
                     return fact.text.toLowerCase().includes(event.target.value.toLowerCase())
                 }
             )
+
             allFilteredFacts.push(filteredFacts)
+            console.log(allFilteredFacts)
         }
 
         this.setState({
@@ -161,40 +177,6 @@ class FactGenerator extends React.Component {
     }
 
     render() {
-        let backgroundDivs
-        let count = 0;
-        for (let type of this.state.factTypes)
-        {
-
-            if(type.getFact){
-                count = count +1
-                console.log(count)
-            }
-        }
-        let widthPercentage = (1/count)* 100
-
-        let divWidth = widthPercentage+'%'
-        let divStyle
-
-        count = 0// this can not be the best way but I have to reset this counter to then calculate the margins for the divs
-        backgroundDivs = this.state.filteredFacts.map((obj, index) => {
-            console.log('is this if working the way it should?',obj.facts !== [])
-            if(obj.facts !== []){
-
-                let divMargin = widthPercentage * count+'%'
-                divStyle = {width: divWidth, leftMargin: divMargin}
-                console.log('the div style is: ', divStyle)
-                count = count +1
-                console.log('here is the object that should have fact and animal', obj)
-
-                let divContent = obj.facts.map(fact => <p>{fact.text}</p>)//using index only works because the types of facts are in the same order
-                console.log('the div content is', divContent)
-                return <div className={obj.animal} style={divStyle}>{divContent}</div>
-
-            }
-
-        })
-
 
         return (
             <div className='container-fluid'>
@@ -220,10 +202,8 @@ class FactGenerator extends React.Component {
 
                 </div>
 
+                <Facts facts={this.state.filteredFacts}/>
 
-                <div className='bg'>
-                    {backgroundDivs}
-                </div>
 
 
             </div>
