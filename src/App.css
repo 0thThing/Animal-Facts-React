@@ -36,6 +36,7 @@
   float: top;
   display: flex;
   max-height: 66vh;
+  height: 66vh;
   background-color: grey;
 
 
